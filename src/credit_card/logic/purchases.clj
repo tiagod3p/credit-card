@@ -1,5 +1,5 @@
-(ns credit-card.purchases
-  (:require [credit-card.validations :as c.validations]
+(ns credit-card.logic.purchases
+  (:require [credit-card.logic.validations :as logic.validate]
             [credit-card.models.credit-card :as models.credit-card]
             [credit-card.models.general :as models.general]
             [credit-card.models.purchase :as models.purchase]
@@ -13,11 +13,11 @@
    credit-card   :- models.credit-card/CreditCard]
   (let [current-limit   (:limit credit-card)
         expiration-date (:expiration-date credit-card)
-        valid-purchase  (c.validations/valid-purchase?
-                          (c.validations/limit? current-limit amount)
-                          (c.validations/expired-card? expiration-date date))
+        valid-purchase  (logic.validate/valid-purchase?
+                          (logic.validate/limit? current-limit amount)
+                          (logic.validate/expired-card? expiration-date date))
         limit-to-update (if valid-purchase
-                          (c.validations/new-limit current-limit amount)
+                          (logic.validate/new-limit current-limit amount)
                           current-limit)
         credit-card-updated (update credit-card :limit (constantly limit-to-update))]
     {:date        date
@@ -57,7 +57,7 @@
 (s/defn search-purchases-by-year-and-month :- [models.purchase/Purchase]
   [purchases                               :- [models.purchase/Purchase]
    year                                    :- models.general/NumGreaterOrEqualThanZero
-   month                                   :- models.general/MonthValue]           
+   month                                   :- models.general/MonthValue]
   (filter
     (fn [purchase]
       (and
@@ -66,7 +66,7 @@
     purchases))
 
 (s/defn monthly-bill :- models.general/NumGreaterOrEqualThanZero
-  [purchases         :- [models.purchase/Purchase]    
+  [purchases         :- [models.purchase/Purchase]
    year              :- models.general/NumGreaterOrEqualThanZero
    month             :- models.general/MonthValue]
   (let [monthly-purchases (search-purchases-by-year-and-month purchases year month)]
