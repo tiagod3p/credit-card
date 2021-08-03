@@ -10,23 +10,26 @@
                   :expiration-date (java.time.YearMonth/parse "2029-09")
                   :limit           1000})
 
-(def purchase-1 (c.purchases/purchase (java.time.LocalDate/parse "2021-05-07")
-                          199
-                          "iFood"
-                          "Restaurant"
-                          credit-card))
+(def purchase-1 (c.purchases/purchase
+                   (java.time.LocalDate/parse "2021-05-07")
+                   199
+                   "iFood"
+                   "Restaurant"
+                   credit-card))
 
-(def purchase-2 (c.purchases/purchase (java.time.LocalDate/parse "2021-10-07")
-                          95
-                          "C&A"
-                          "Clothing"
-                          (:credit-card purchase-1)))
+(def purchase-2 (c.purchases/purchase
+                  (java.time.LocalDate/parse "2021-10-07")
+                  95
+                  "C&A"
+                  "Clothing"
+                  (:credit-card purchase-1)))
 
-(def purchase-3 (c.purchases/purchase (java.time.LocalDate/parse "2021-10-07")
-                          200
-                          "C&A"
-                          "Clothing"
-                          (:credit-card purchase-2)))
+(def purchase-3 (c.purchases/purchase
+                  (java.time.LocalDate/parse "2021-10-07")
+                  100
+                  "C&A"
+                  "Clothing"
+                  (:credit-card purchase-2)))
 
 (def all-purchases [purchase-1 purchase-2 purchase-3])
 
