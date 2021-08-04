@@ -1,5 +1,6 @@
 (ns credit-card.logic.purchases
   (:require [credit-card.logic.validations :as logic.validate]
+            [credit-card.logic.credit-card :as logic.credit-card]
             [credit-card.models.credit-card :as models.credit-card]
             [credit-card.models.general :as models.general]
             [credit-card.models.purchase :as models.purchase]
@@ -17,7 +18,7 @@
                           (logic.validate/limit? current-limit amount)
                           (logic.validate/expired-card? expiration-date date))
         limit-to-update (if valid-purchase
-                          (logic.validate/new-limit current-limit amount)
+                          (logic.credit-card/new-limit current-limit amount)
                           current-limit)
         credit-card-updated (update credit-card :limit (constantly limit-to-update))]
     {:date        date
