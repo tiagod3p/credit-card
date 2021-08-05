@@ -76,9 +76,9 @@
 (s/defn list-purchases-of-client :- [models.purchase/Purchase]
   [client-data                   :- models.credit-card/ClientData
    purchases                     :- [models.purchase/Purchase]]
-  (let [credit-card-number-of-client (get-in client-data [:credit-card :number])]
+  (let [credit-cards-of-client (:credit-cards client-data)
+        credit-cards-numbers-of-client (map #(get % :number) credit-cards-of-client)]
     (filter (fn
               [purchase]
-              (= credit-card-number-of-client
-                 (get-in purchase [:credit-card :number])))
+              (some #(= (get-in purchase [:credit-card :number]) %) credit-cards-numbers-of-client))
             purchases)))

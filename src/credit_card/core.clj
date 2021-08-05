@@ -4,7 +4,8 @@
 
 (def client-data {:full-name "Tiago Vidal"
                   :cpf       "999.999.999-99"
-                  :email     "tiago@my-email.com.br"})
+                  :email     "tiago@my-email.com.br"
+                  :credit-cards []})
 
 (def credit-card {:number          "111"
                   :cvv             "222"
@@ -27,7 +28,7 @@
 
 (def purchase-3 (logic.purchases/purchase
                   (java.time.LocalDate/parse "2021-10-07")
-                  100
+                  100 
                   "C&A"
                   "Clothing"
                   (:credit-card purchase-2)))
