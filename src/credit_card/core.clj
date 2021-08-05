@@ -1,5 +1,6 @@
 (ns credit-card.core
-  (:require [credit-card.logic.purchases :as logic.purchases]))
+  (:require [credit-card.logic.purchases :as logic.purchases]
+            [credit-card.logic.credit-card :as logic.credit-card]))
 
 (def client-data {:full-name "Tiago Vidal"
                   :cpf       "999.999.999-99"
@@ -35,12 +36,28 @@
 
 (def approved-purchases (logic.purchases/search-purchases all-purchases {:approved? true}))
 
+(def client-data-with-initial-credit-card-associated (logic.credit-card/associate-credit-card-with-client credit-card client-data))
+
+(def credit-card-most-updated (:credit-card (last all-purchases)))
+
+(def client-data-updated (logic.credit-card/associate-credit-card-with-client
+                          credit-card-most-updated
+                          client-data-with-initial-credit-card-associated))
+
+(def purchases-client (logic.purchases/list-purchases-of-client client-data-updated all-purchases))
+
 (defn -main
   [& args]
   (println "-------------------------------------------------")
+  (println "Associated credit-card:" client-data-with-initial-credit-card-associated)
+  (println "-------------------------------------------------")
   (println "Last transaction:" (last all-purchases))
   (println "-------------------------------------------------")
-  (println "Credit Card most updated:" (:credit-card (last all-purchases)))
+  (println "Credit Card most updated:" credit-card-most-updated)
+  (println "-------------------------------------------------")
+  (println "Client Data most updated:" client-data-updated)
+  (println "-------------------------------------------------")
+  (println "Purchases of the client:" purchases-client)
   (println "-------------------------------------------------")
   (println "Expenses by category:" (logic.purchases/group-purchases-by-category approved-purchases))
   (println "-------------------------------------------------")

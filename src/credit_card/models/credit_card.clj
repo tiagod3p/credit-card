@@ -7,3 +7,10 @@
    :cvv             s/Str
    :expiration-date models.general/YearMonth
    :limit           models.general/NumGreaterOrEqualThanZero})
+
+(def ClientData
+  {:full-name   s/Str
+   :cpf         s/Str
+   :email       s/Str
+   (s/optional-key :credit-card) CreditCard})
+

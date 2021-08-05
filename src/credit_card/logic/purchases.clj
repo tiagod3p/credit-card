@@ -73,3 +73,12 @@
   (let [monthly-purchases (search-purchases-by-year-and-month purchases year month)]
     (total-purchases-amount monthly-purchases)))
 
+(s/defn list-purchases-of-client :- [models.purchase/Purchase]
+  [client-data                   :- models.credit-card/ClientData
+   purchases                     :- [models.purchase/Purchase]]
+  (let [credit-card-number-of-client (get-in client-data [:credit-card :number])]
+    (filter (fn
+              [purchase]
+              (= credit-card-number-of-client
+                 (get-in purchase [:credit-card :number])))
+            purchases)))
