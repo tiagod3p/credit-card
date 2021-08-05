@@ -2,7 +2,7 @@
   (:require [schema.core :as s]
             [credit-card.models.general :as models.general]))
 
-(def CreditCard
+(s/def CreditCard
   {:number          s/Str
    :cvv             s/Str
    :expiration-date models.general/YearMonth
@@ -12,5 +12,4 @@
   {:full-name   s/Str
    :cpf         s/Str
    :email       s/Str
-   (s/optional-key :credit-card) CreditCard})
-
+   :credit-cards [CreditCard]})
