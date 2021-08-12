@@ -11,13 +11,13 @@
 (s/defn associate-credit-card-with-client :- models.credit-card/ClientData 
   [credit-card :- models.credit-card/CreditCard
    client-data :- models.credit-card/ClientData]
-  (let [credit-cards-of-client (get client-data :credit-cards)
+  (let [credit-cards-of-client (get client-data :client/credit-cards)
         filtered-card          (filter (fn [card]
-                                         (= (get card :number)
-                                            (get credit-card :number)))
+                                         (= (get card :credit-card/number)
+                                            (get credit-card :credit-card/number)))
                                        credit-cards-of-client)
         index-of-credit-card (.indexOf credit-cards-of-client (first filtered-card))]
     (if (not= index-of-credit-card -1)
-      (update-in client-data [:credit-cards index-of-credit-card] (constantly credit-card))
-      (update-in client-data [:credit-cards] conj credit-card))))
+      (update-in client-data [:client/credit-cards index-of-credit-card] (constantly credit-card))
+      (update-in client-data [:client/credit-cards] conj credit-card))))
 

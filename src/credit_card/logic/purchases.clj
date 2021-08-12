@@ -12,25 +12,25 @@
    merchant      :- s/Str
    category      :- s/Str
    credit-card   :- models.credit-card/CreditCard]
-  (let [current-limit   (:limit credit-card)
-        expiration-date (:expiration-date credit-card)
+  (let [current-limit   (:credit-card/limit credit-card)
+        expiration-date (:credit-card/expiration-date credit-card)
         valid-purchase  (logic.validate/valid-purchase?
                           (logic.validate/limit? current-limit amount)
                           (logic.validate/expired-card? expiration-date date))
         limit-to-update (if valid-purchase
                           (logic.credit-card/new-limit current-limit amount)
                           current-limit)
-        credit-card-updated (update credit-card :limit (constantly limit-to-update))]
-    {:date        date
-     :amount      amount
-     :merchant    merchant
-     :category    category
-     :approved?   valid-purchase
-     :credit-card credit-card-updated}))
+        credit-card-updated (update credit-card :credit-card/limit (constantly limit-to-update))]
+    {:purchase/date        date
+     :purchase/amount      amount
+     :purchase/merchant    merchant
+     :purchase/category    category
+     :purchase/approved?   valid-purchase
+     :purchase/credit-card credit-card-updated}))
 
 (s/defn purchases-amount :- [models.general/NumGreaterOrEqualThanZero]
   [purchases             :- [models.purchase/Purchase]]
-  (map :amount purchases))
+  (map :purchase/amount purchases))
 
 (s/defn total-purchases-amount  :- models.general/NumGreaterOrEqualThanZero
   [purchases                    :- [models.purchase/Purchase]]
@@ -44,7 +44,7 @@
   [purchases                        :- [models.purchase/Purchase]]
   (map
     total-purchases-amount-by-category
-    (group-by :category purchases)))
+    (group-by :purchase/category purchases)))
 
 (s/defn search-purchases :- [models.purchase/Purchase]
   [purchases             :- [models.purchase/Purchase]
@@ -62,8 +62,8 @@
   (filter
     (fn [purchase]
       (and
-        (= month (.getMonthValue (:date purchase)))
-        (= year (.getYear (:date purchase)))))
+       (= month (.getMonthValue (:purchase/date purchase)))
+       (= year (.getYear (:purchase/date purchase)))))
     purchases))
 
 (s/defn monthly-bill :- models.general/NumGreaterOrEqualThanZero
@@ -76,9 +76,9 @@
 (s/defn list-purchases-of-client :- [models.purchase/Purchase]
   [client-data                   :- models.credit-card/ClientData
    purchases                     :- [models.purchase/Purchase]]
-  (let [credit-cards-of-client (:credit-cards client-data)
-        credit-cards-numbers-of-client (map #(get % :number) credit-cards-of-client)]
+  (let [credit-cards-of-client (:client/credit-cards client-data)
+        credit-cards-numbers-of-client (map #(get % :credit-card/number) credit-cards-of-client)]
     (filter (fn
               [purchase]
-              (some #(= (get-in purchase [:credit-card :number]) %) credit-cards-numbers-of-client))
+              (some #(= (get-in purchase [:purchase/credit-card :credit-card/number]) %) credit-cards-numbers-of-client))
             purchases)))
