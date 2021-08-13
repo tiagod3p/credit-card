@@ -5,32 +5,36 @@
             [datomic.api :as d]
             [schema.core :as s]))
 
+(defn add-uuid
+  ([m]
+   (if (get m :id)
+     m
+     (assoc m :id (logic.utils/uuid))))
+
+  ([m namespace]
+   (let [ns-keyword (keyword namespace "id")]
+     (if (get m ns-keyword)
+       m
+       (assoc m ns-keyword (logic.utils/uuid))))))
+
 (s/defn client-data->datomic-client-data
   [client-data :- models.credit-card/ClientData]
-  (if (get client-data :client/id)
-    client-data
-    (assoc client-data :client/id (logic.utils/uuid))))
+  (add-uuid client-data "client"))
 
 (s/defn credit-card->datomic-credit-card
   [credit-card :- models.credit-card/CreditCard]
-  (let [credit-card-updated (-> credit-card
-                                (update :credit-card/expiration-date logic.utils/year-month->inst)
-                                (update :credit-card/limit float))]
-    (if (get credit-card-updated :credit-card/id)
-      credit-card-updated
-      (assoc credit-card-updated :credit-card/id (logic.utils/uuid)))))
+  (-> credit-card
+      (add-uuid "credit-card")
+      (update :credit-card/expiration-date logic.utils/year-month->inst)
+      (update :credit-card/limit float)))
 
 (s/defn purchase->datomic-purchase
   [purchase :- models.purchase/Purchase]
-  (let [purchase-updated (-> purchase
-                             (update :purchase/date logic.utils/local-date->inst)
-                             (update :purchase/amount float)
-                             (update
-                              :purchase/credit-card
-                              (constantly [:credit-card/id (get-in purchase [:purchase/credit-card :credit-card/id])])))]
-    (if (get purchase-updated :purchase/id)
-      purchase-updated
-      (assoc purchase-updated :purchase/id (logic.utils/uuid)))))
+  (-> purchase
+      (add-uuid "purchase")
+      (update :purchase/date logic.utils/local-date->inst)
+      (update :purchase/amount float)
+      (update :purchase/credit-card (constantly [:credit-card/id (get-in purchase [:purchase/credit-card :credit-card/id])]))))
 
 (s/defn upsert-client-data!
   [client-data :- models.credit-card/ClientData
@@ -56,7 +60,7 @@
   (d/q '[:find [(pull ?purchase [*]) ...]
          :in $ ?credit-card-id
          :where [?purchase :purchase/credit-card ?credit-card]
-                [?credit-card :credit-card/id ?credit-card-id]]
+         [?credit-card :credit-card/id ?credit-card-id]]
        db credit-card-id))
 
 (s/defn all-credit-cards
