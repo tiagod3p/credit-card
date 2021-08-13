@@ -6,6 +6,7 @@
             [credit-card.models.purchase :as models.purchase]
             [credit-card.db.datomic.config :as db.config]
             [credit-card.db.datomic.credit-card :as db.credit-card]
+            [credit-card.db.datomic.purchases :as db.purchases]
             [datomic.api :as d]))
 
 (def client-data {:client/full-name    "Tiago Vidal"
@@ -37,7 +38,9 @@
 (db.credit-card/upsert-credit-card! credit-card conn)
 (db.credit-card/upsert-credit-card! credit-card-black conn)
 
-(db.credit-card/all-credit-cards (d/db conn))
+(->> (d/db conn)
+     db.credit-card/all-credit-cards
+     (map db.credit-card/datomic-credit-card->credit-card))
 
 (def purchase-1 (logic.purchases/purchase
                  (java.time.LocalDate/parse "2021-05-07")
@@ -71,11 +74,21 @@
 
 (mapv #(db.credit-card/upsert-purchase-and-update-credit-card! % conn) all-purchases)
 
-(db.credit-card/credit-card-by-id (:credit-card/id credit-card) (d/db conn))
-(db.credit-card/credit-card-by-id (:credit-card/id credit-card-black) (d/db conn))
+(-> credit-card
+    :credit-card/id
+    (db.credit-card/credit-card-by-id (d/db conn))
+    (db.credit-card/datomic-credit-card->credit-card))
 
-(db.credit-card/purchases-by-credit-card-id (:credit-card/id credit-card) (d/db conn))
-(db.credit-card/purchases-by-credit-card-id (:credit-card/id credit-card-black) (d/db conn))
+(-> credit-card-black
+    :credit-card/id
+    (db.credit-card/credit-card-by-id (d/db conn))
+    (db.credit-card/datomic-credit-card->credit-card))
+
+(map
+ db.purchases/datomic-purchase->purchase
+ (-> credit-card
+     :credit-card/id
+     (db.purchases/purchases-by-credit-card-id (d/db conn))))
 
 (def approved-purchases (logic.purchases/search-purchases all-purchases {:purchase/approved? true}))
 
