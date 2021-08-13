@@ -32,7 +32,7 @@
                        :db/cardinality :db.cardinality/one}
                       {:db/ident       :purchase/approved?
                        :db/valueType   :db.type/boolean
-                       :db/cardinality :db.cardinality/many}
+                       :db/cardinality :db.cardinality/one}
                       {:db/ident       :purchase/credit-card
                        :db/valueType   :db.type/ref
                        :db/cardinality :db.cardinality/one}])
