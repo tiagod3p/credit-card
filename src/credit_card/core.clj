@@ -1,7 +1,7 @@
 (ns credit-card.core
   (:require [credit-card.logic.purchases :as logic.purchases]
             [credit-card.logic.credit-card :as logic.credit-card]
-            [credit-card.logic.utils :as logic.utils]
+            [credit-card.common.utils :as common.utils]
             [credit-card.models.credit-card :as models.credit-card]
             [credit-card.models.purchase :as models.purchase]
             [credit-card.db.datomic.config :as db.config]
@@ -13,13 +13,13 @@
                   :client/email        "tiago@my-email.com.br"
                   :client/credit-cards []})
 
-(def credit-card {:credit-card/id              (logic.utils/uuid)
+(def credit-card {:credit-card/id              (common.utils/uuid)
                   :credit-card/number          "111"
                   :credit-card/cvv             "222"
                   :credit-card/expiration-date (java.time.YearMonth/parse "2029-09")
                   :credit-card/limit           1000})
 
-(def credit-card-black {:credit-card/id              (logic.utils/uuid)
+(def credit-card-black {:credit-card/id              (common.utils/uuid)
                         :credit-card/number          "1000 2000 3000 0545"
                         :credit-card/cvv             "901"
                         :credit-card/expiration-date (java.time.YearMonth/parse "2029-09")

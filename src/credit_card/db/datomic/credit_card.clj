@@ -1,7 +1,8 @@
 (ns credit-card.db.datomic.credit-card
   (:require [credit-card.models.purchase :as models.purchase]
             [credit-card.models.credit-card :as models.credit-card]
-            [credit-card.logic.utils :as logic.utils]
+            [credit-card.common.utils :as common.utils]
+            [credit-card.common.time :as common.time]
             [datomic.api :as d]
             [schema.core :as s]))
 
@@ -9,13 +10,13 @@
   ([m]
    (if (get m :id)
      m
-     (assoc m :id (logic.utils/uuid))))
+     (assoc m :id (common.utils/uuid))))
 
   ([m namespace]
    (let [ns-keyword (keyword namespace "id")]
      (if (get m ns-keyword)
        m
-       (assoc m ns-keyword (logic.utils/uuid))))))
+       (assoc m ns-keyword (common.utils/uuid))))))
 
 (s/defn client-data->datomic-client-data
   [client-data :- models.credit-card/ClientData]
@@ -25,14 +26,14 @@
   [credit-card :- models.credit-card/CreditCard]
   (-> credit-card
       (add-uuid "credit-card")
-      (update :credit-card/expiration-date logic.utils/year-month->inst)
+      (update :credit-card/expiration-date common.time/year-month->inst)
       (update :credit-card/limit float)))
 
 (s/defn purchase->datomic-purchase
   [purchase :- models.purchase/Purchase]
   (-> purchase
       (add-uuid "purchase")
-      (update :purchase/date logic.utils/local-date->inst)
+      (update :purchase/date common.time/local-date->inst)
       (update :purchase/amount float)
       (update :purchase/credit-card (constantly [:credit-card/id (get-in purchase [:purchase/credit-card :credit-card/id])]))))
 

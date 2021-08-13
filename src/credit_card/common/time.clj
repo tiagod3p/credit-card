@@ -1,4 +1,4 @@
-(ns credit-card.logic.utils)
+(ns credit-card.common.time)
 
 (defn local-date-time->inst
   [^java.time.LocalDateTime local-date-time]
@@ -15,8 +15,4 @@
 (defn year-month->inst
   [^java.time.YearMonth ym]
   (local-date->inst (java.time.LocalDate/of (.getYear ym) (.getMonth ym) 1)))
-
-(defn uuid
-  []
-  (java.util.UUID/randomUUID))
 
