@@ -51,6 +51,14 @@
         purchase-datomic (purchase->datomic-purchase purchase)]
     (d/transact conn [purchase-datomic credit-card-datomic])))
 
+(s/defn purchases-by-credit-card-id
+  [credit-card-id :- java.util.UUID db]
+  (d/q '[:find [(pull ?purchase [*]) ...]
+         :in $ ?credit-card-id
+         :where [?purchase :purchase/credit-card ?credit-card]
+                [?credit-card :credit-card/id ?credit-card-id]]
+       db credit-card-id))
+
 (s/defn all-credit-cards
   [db]
   (d/q '[:find [(pull ?credit-card [*]) ...]

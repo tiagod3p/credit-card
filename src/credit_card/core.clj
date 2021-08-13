@@ -19,8 +19,13 @@
                   :credit-card/expiration-date (java.time.YearMonth/parse "2029-09")
                   :credit-card/limit           1000})
 
-(db.config/delete-db! db.config/db-uri)
+(def credit-card-black {:credit-card/id              (logic.utils/uuid)
+                        :credit-card/number          "1000 2000 3000 0545"
+                        :credit-card/cvv             "901"
+                        :credit-card/expiration-date (java.time.YearMonth/parse "2029-09")
+                        :credit-card/limit           50000})
 
+(db.config/delete-db! db.config/db-uri)
 (def conn (db.config/open-connection! db.config/db-uri))
 
 (db.config/create-schema! conn (concat
@@ -30,11 +35,9 @@
 (db.credit-card/upsert-client-data! client-data conn)
 
 (db.credit-card/upsert-credit-card! credit-card conn)
+(db.credit-card/upsert-credit-card! credit-card-black conn)
 
-(let [all-credit-cards-datomic (db.credit-card/all-credit-cards (d/db conn))
-      first-credit-card        (first all-credit-cards-datomic)
-      credit-card-by-id        (db.credit-card/credit-card-by-id (:credit-card/id first-credit-card) (d/db conn))]
-  credit-card-by-id)
+(db.credit-card/all-credit-cards (d/db conn))
 
 (def purchase-1 (logic.purchases/purchase
                  (java.time.LocalDate/parse "2021-05-07")
@@ -57,11 +60,22 @@
                  "Clothing"
                  (:purchase/credit-card purchase-2)))
 
-(def all-purchases [purchase-1 purchase-2 purchase-3])
+(def purchase-4 (logic.purchases/purchase
+                 (java.time.LocalDate/parse "2021-11-22")
+                 23350
+                 "Burger King"
+                 "Restaurant"
+                 credit-card-black))
 
-(map #(db.credit-card/upsert-purchase-and-update-credit-card! % conn) all-purchases)
+(def all-purchases [purchase-1 purchase-2 purchase-3 purchase-4])
+
+(mapv #(db.credit-card/upsert-purchase-and-update-credit-card! % conn) all-purchases)
 
 (db.credit-card/credit-card-by-id (:credit-card/id credit-card) (d/db conn))
+(db.credit-card/credit-card-by-id (:credit-card/id credit-card-black) (d/db conn))
+
+(db.credit-card/purchases-by-credit-card-id (:credit-card/id credit-card) (d/db conn))
+(db.credit-card/purchases-by-credit-card-id (:credit-card/id credit-card-black) (d/db conn))
 
 (def approved-purchases (logic.purchases/search-purchases all-purchases {:purchase/approved? true}))
 
